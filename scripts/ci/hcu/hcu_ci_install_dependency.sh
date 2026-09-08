@@ -95,6 +95,17 @@ if [[ -n "${INSTALL_WHEEL_URLS}" ]]; then
   run_in_container "python3 -c 'import sgl_kernel; print(\"sgl_kernel:\", sgl_kernel.__file__)'"
 fi
 
+# shellcheck source=scripts/ci/utils/sgl_eval_ref.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../utils/sgl_eval_ref.sh"
+SGL_EVAL_VENV="/opt/sgl-eval-venv"
+echo "[hcu-ci] Installing pinned sgl-eval in ${SGL_EVAL_VENV}"
+run_in_container "if command -v virtualenv >/dev/null; then virtualenv --clear '${SGL_EVAL_VENV}'; else python3 -m venv --clear '${SGL_EVAL_VENV}'; fi"
+install_with_retry docker exec "${CONTAINER}" \
+  "${SGL_EVAL_VENV}/bin/pip" install --cache-dir=/sgl-data/pip-cache "${SGL_EVAL_SPEC}"
+run_in_container "ln -sf '${SGL_EVAL_VENV}/bin/sgl-eval' /usr/local/bin/sgl-eval"
+run_in_container "command -v sgl-eval"
+run_in_container "sgl-eval --help >/dev/null"
+
 if [[ "${SKIP_DEPENDENCY_INSTALL}" == "1" || "${SKIP_DEPENDENCY_INSTALL}" == "true" ]]; then
   echo "[hcu-ci] HCU_CI_SKIP_DEPENDENCY_INSTALL=${SKIP_DEPENDENCY_INSTALL}; skipping regular dependency installation"
   print_python_status

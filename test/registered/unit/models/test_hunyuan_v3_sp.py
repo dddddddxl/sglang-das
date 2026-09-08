@@ -4,9 +4,10 @@
 import pytest
 import torch
 
-from sglang.test.ci.ci_register import register_cpu_ci
+from sglang.test.ci.ci_register import register_cpu_ci, register_hcu_ci
 
 register_cpu_ci(est_time=3, suite="base-a-test-cpu")
+register_hcu_ci(est_time=3, suite="stage-a-test-1-hcu-small")
 
 from sglang.srt.models.hunyuan_v3 import (
     _apply_hy3_qk_norm,
